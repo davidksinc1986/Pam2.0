@@ -72,3 +72,9 @@ Registra webhook:
 - Motor de reglas por campaña (score, horarios, disponibilidad).
 - ETL de leads con normalización y deduplicación avanzada.
 - Multi-tenant con RBAC y auditoría.
+
+## 6) Guía de ejecución profesional
+
+Para implementar cambios con foco en estabilidad, UX para usuarios no técnicos y salida a producción, sigue la guía:
+
+- `docs/principios-plataforma-saas.md`
