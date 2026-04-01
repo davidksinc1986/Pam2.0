@@ -8,8 +8,13 @@ export function CRMPage({ session }: { session: { token: string } | null }) {
   const [form, setForm] = useState({ name: "", contact: "" });
   const [error, setError] = useState("");
 
-  const load = () => session && apiRequest<any[]>("/leads", "GET", undefined, session.token).then(setLeads).catch((e) => setError(e.message));
-  useEffect(load, [session]);
+  const load = async () => {
+    if (!session) return;
+    await apiRequest<any[]>("/leads", "GET", undefined, session.token).then(setLeads).catch((e) => setError(e.message));
+  };
+  useEffect(() => {
+    void load();
+  }, [session]);
 
   async function createLead() {
     if (!session) return;

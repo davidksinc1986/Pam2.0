@@ -24,4 +24,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     user = await db.scalar(select(User).where(User.email == email))
     if not user:
         raise HTTPException(status_code=401, detail="Usuario no encontrado")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Usuario desactivado")
     return user
