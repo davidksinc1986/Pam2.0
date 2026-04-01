@@ -27,11 +27,22 @@ class Settings(BaseSettings):
     deepgram_api_key: str = ""
     elevenlabs_api_key: str = ""
 
+    bootstrap_admin_email: str = ""
+    bootstrap_admin_password: str = ""
+
     @field_validator("jwt_secret")
     @classmethod
     def validate_jwt_secret(cls, value: str) -> str:
         if value in {"change-me", "super-change-me"}:
             raise ValueError("JWT_SECRET inseguro: configura un secreto real")
+        return value
+
+
+    @field_validator("bootstrap_admin_password")
+    @classmethod
+    def validate_bootstrap_admin_password(cls, value: str) -> str:
+        if value and len(value) < 8:
+            raise ValueError("BOOTSTRAP_ADMIN_PASSWORD debe tener al menos 8 caracteres")
         return value
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")

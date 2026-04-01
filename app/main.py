@@ -25,6 +25,7 @@ from app.services.security import hash_password
 app = FastAPI(title=settings.app_name)
 logger = logging.getLogger("pam.api")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger.info("app_boot environment=%s", settings.environment)
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,18 +54,22 @@ async def startup() -> None:
             tenant = Tenant(name="PAM Demo", default_language="es")
             session.add(tenant)
             await session.flush()
-        admin = await session.scalar(select(User).where(User.email == "davidksinc@gmail.com"))
-        if not admin:
-            session.add(
-                User(
-                    email="davidksinc@gmail.com",
-                    password_hash=hash_password("PamAdmin123!"),
-                    tenant_id=tenant.id,
-                    preferred_language="es",
-                    is_super_admin=True,
-                    is_active=True,
+        if settings.bootstrap_admin_email and settings.bootstrap_admin_password:
+            admin = await session.scalar(select(User).where(User.email == settings.bootstrap_admin_email))
+            if not admin:
+                session.add(
+                    User(
+                        email=settings.bootstrap_admin_email,
+                        password_hash=hash_password(settings.bootstrap_admin_password),
+                        tenant_id=tenant.id,
+                        preferred_language="es",
+                        is_super_admin=True,
+                        is_active=True,
+                    )
                 )
-            )
+                logger.info("bootstrap_admin_created email=%s", settings.bootstrap_admin_email)
+        else:
+            logger.warning("bootstrap_admin_skipped reason=missing_bootstrap_admin_credentials")
         await session.commit()
 
 

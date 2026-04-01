@@ -67,8 +67,8 @@ Esto crea:
 
 Credenciales iniciales:
 
-- `davidksinc@gmail.com`
-- `PamAdmin123!`
+- Se crean de forma segura con variables de entorno `BOOTSTRAP_ADMIN_EMAIL` y `BOOTSTRAP_ADMIN_PASSWORD`.
+- No se incluyen contraseñas hardcodeadas en el repositorio.
 
 ---
 
