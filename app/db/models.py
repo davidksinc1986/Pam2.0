@@ -8,6 +8,11 @@ class Tenant(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(120), unique=True, index=True)
     default_language: Mapped[str] = mapped_column(String(10), default="es")
+    onboarding_step: Mapped[int] = mapped_column(Integer, default=1)
+    ai_assistant_name: Mapped[str] = mapped_column(String(80), default="PAM")
+    ai_tone: Mapped[str] = mapped_column(String(120), default="profesional y cálido")
+    ai_behavior: Mapped[str] = mapped_column(Text, default="resolver rápido y agendar seguimiento")
+    playbook: Mapped[str] = mapped_column(Text, default="")
 
 
 class User(Base):

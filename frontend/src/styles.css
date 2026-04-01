@@ -19,3 +19,6 @@ input,select,textarea{@apply w-full p-2 rounded-lg border border-slate-300 mt-1}
 .kanban{@apply grid grid-cols-1 md:grid-cols-4 gap-2}
 .column{@apply bg-slate-100 p-3 rounded-xl min-h-48}
 .lead-card{@apply bg-white rounded-lg p-2 my-2 border border-slate-300 flex flex-col}
+
+.error{@apply text-red-700 bg-red-100 border border-red-200 rounded p-2 my-2}
+button:disabled{@apply opacity-60 cursor-not-allowed}

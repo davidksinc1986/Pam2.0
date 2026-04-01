@@ -1,25 +1,42 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.deps import get_current_user, get_db
+from app.db.models import Tenant, User
 from app.services.i18n import t
 
 router = APIRouter(prefix="/ai", tags=["ai"])
-memory: dict[int, dict] = {}
 
 
-@router.post("/profile/{company_id}")
-async def configure_ai(company_id: int, payload: dict) -> dict:
-    memory[company_id] = {
-        "assistant_name": payload.get("assistant_name", "PAM"),
-        "tone": payload.get("tone", "profesional y cálido"),
-        "language": payload.get("language", "es"),
-        "behavior": payload.get("behavior", "resolver rápido y agendar seguimiento"),
-        "faq": payload.get("faq", []),
+@router.post("/profile")
+async def configure_ai(payload: dict, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+    tenant = await db.scalar(select(Tenant).where(Tenant.id == user.tenant_id))
+    tenant.ai_assistant_name = payload.get("assistant_name", tenant.ai_assistant_name)
+    tenant.ai_tone = payload.get("tone", tenant.ai_tone)
+    tenant.ai_behavior = payload.get("behavior", tenant.ai_behavior)
+    await db.commit()
+    return {
+        "status": "configured",
+        "ai": {
+            "assistant_name": tenant.ai_assistant_name,
+            "tone": tenant.ai_tone,
+            "language": tenant.default_language,
+            "behavior": tenant.ai_behavior,
+        },
     }
-    return {"status": "configured", "ai": memory[company_id]}
 
 
-@router.get("/memory/{company_id}")
-async def get_memory(company_id: int) -> dict:
-    return memory.get(company_id, {})
+@router.get("/memory")
+async def get_memory(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+    tenant = await db.scalar(select(Tenant).where(Tenant.id == user.tenant_id))
+    return {
+        "assistant_name": tenant.ai_assistant_name,
+        "tone": tenant.ai_tone,
+        "language": tenant.default_language,
+        "behavior": tenant.ai_behavior,
+        "playbook": tenant.playbook,
+    }
 
 
 @router.get("/translate/{lang}/{key}")
