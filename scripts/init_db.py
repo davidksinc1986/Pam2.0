@@ -5,6 +5,7 @@ from app.db.base import Base
 from app.db.models import Campaign, Lead, Tenant, User
 from app.db.session import AsyncSessionLocal, engine
 from app.services.security import hash_password
+from app.core.config import settings
 
 
 async def main() -> None:
@@ -18,9 +19,12 @@ async def main() -> None:
             session.add(tenant)
             await session.flush()
 
-        admin = await session.scalar(select(User).where(User.email == "davidksinc@gmail.com"))
-        if not admin:
-            session.add(User(email="davidksinc@gmail.com", password_hash=hash_password("PamAdmin123!"), tenant_id=tenant.id, preferred_language="es", is_super_admin=True))
+        if settings.bootstrap_admin_email and settings.bootstrap_admin_password:
+            admin = await session.scalar(select(User).where(User.email == settings.bootstrap_admin_email))
+            if not admin:
+                session.add(User(email=settings.bootstrap_admin_email, password_hash=hash_password(settings.bootstrap_admin_password), tenant_id=tenant.id, preferred_language="es", is_super_admin=True))
+        else:
+            print("Bootstrap admin skipped: define BOOTSTRAP_ADMIN_EMAIL and BOOTSTRAP_ADMIN_PASSWORD")
 
         if not await session.scalar(select(Lead).where(Lead.tenant_id == tenant.id)):
             session.add_all([
