@@ -6,8 +6,13 @@ export function CampaignBuilderPage({ session }: { session: { token: string } | 
   const [form, setForm] = useState({ name: "", mode: "assisted", script: "", language: "es" });
   const [error, setError] = useState("");
 
-  const load = () => session && apiRequest<any[]>("/campaigns", "GET", undefined, session.token).then(setCampaigns).catch((e) => setError(e.message));
-  useEffect(load, [session]);
+  const load = async () => {
+    if (!session) return;
+    await apiRequest<any[]>("/campaigns", "GET", undefined, session.token).then(setCampaigns).catch((e) => setError(e.message));
+  };
+  useEffect(() => {
+    void load();
+  }, [session]);
 
   async function save() {
     if (!session) return;

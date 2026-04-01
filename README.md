@@ -26,7 +26,7 @@ Suite unificada SaaS multi-empresa para operación comercial:
 cp .env.example .env
 ```
 
-Si no tienes credenciales externas, el sistema corre en **modo simulado** para WhatsApp/voz/email.
+Si no tienes credenciales externas, los módulos dependientes (telefonía/WhatsApp/LLM) se muestran como **pendientes de configuración** y retornan error HTTP 412 donde aplique. No se finge ejecución exitosa.
 
 ---
 
@@ -62,9 +62,8 @@ O todo en un comando:
 
 Esto crea:
 
-- Empresa demo
-- Super admin
-- Leads y campaña de ejemplo
+- Empresa base `PAM Demo`
+- Super admin inicial (idempotente)
 
 Credenciales iniciales:
 
@@ -77,8 +76,9 @@ Credenciales iniciales:
 
 1. Login JWT en `POST /auth/login`.
 2. Crear empresa en `POST /companies` (solo super admin).
-3. Crear leads en `POST /leads`.
-4. Crear campañas en `POST /campaigns`.
+3. Crear usuarios de empresa en `POST /users`.
+4. Crear leads en `POST /leads`.
+5. Crear campañas en `POST /campaigns`.
 5. Simular llamada inbound en `POST /calls/inbound`.
 6. Mover etapa CRM en `PATCH /leads/{lead_id}/stage`.
 7. Ejecutar scoring en `POST /leads/score`.
@@ -113,7 +113,7 @@ Credenciales iniciales:
 
 ## 7) Notas de producción
 
-- JWT real activo.
+- JWT real activo + estado de usuario (`is_active`).
 - Separación por empresa (`tenant_id`) en endpoints de negocio.
-- Fallback en integraciones externas para evitar errores 500.
-- Logs simples en worker para trazabilidad.
+- Integraciones externas no configuradas devuelven errores explícitos (sin mock silencioso).
+- Logging estructurado básico con `X-Request-ID`.

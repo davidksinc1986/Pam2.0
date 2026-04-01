@@ -39,12 +39,15 @@ async def outbound_call(payload: dict, db: AsyncSession = Depends(get_db), user:
 
 
 @router.post("/{call_id}/transfer")
-async def transfer_call(call_id: int, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+async def transfer_call(call_id: int, payload: dict, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     call = await db.scalar(select(Call).where(Call.id == call_id, Call.tenant_id == user.tenant_id))
     if not call:
         raise HTTPException(status_code=404, detail="Llamada no encontrada")
+    destination = str(payload.get("destination", "")).strip()
+    if len(destination) < 7:
+        raise HTTPException(status_code=400, detail="Destino de transferencia inválido")
     if not settings.twilio_account_sid or not settings.twilio_phone_number:
         raise HTTPException(status_code=412, detail="Falta conectar Twilio para transferir llamadas")
     call.status = "transferred"
     await db.commit()
-    return {"id": call_id, "status": "transferred", "company_id": user.tenant_id}
+    return {"id": call_id, "status": "transferred", "company_id": user.tenant_id, "destination": destination}

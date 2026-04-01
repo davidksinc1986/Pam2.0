@@ -23,6 +23,7 @@ class User(Base):
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
     preferred_language: Mapped[str] = mapped_column(String(10), default="es")
     is_super_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
 
 class Lead(Base):

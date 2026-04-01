@@ -45,3 +45,16 @@ class OnboardingUpdate(BaseModel):
     ai_tone: str = Field(min_length=2, max_length=120)
     ai_behavior: str = Field(min_length=5)
     playbook: str = ""
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=10, max_length=128)
+    tenant_id: int | None = None
+    preferred_language: str = "es"
+    is_super_admin: bool = False
+
+
+class UserUpdate(BaseModel):
+    preferred_language: str | None = None
+    is_active: bool | None = None

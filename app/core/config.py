@@ -1,9 +1,11 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
     app_name: str = "PAM AI Contact Center"
     environment: str = "dev"
+    cors_origins: list[str] = ["http://localhost:5173"]
 
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
@@ -24,6 +26,13 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     deepgram_api_key: str = ""
     elevenlabs_api_key: str = ""
+
+    @field_validator("jwt_secret")
+    @classmethod
+    def validate_jwt_secret(cls, value: str) -> str:
+        if value in {"change-me", "super-change-me"}:
+            raise ValueError("JWT_SECRET inseguro: configura un secreto real")
+        return value
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

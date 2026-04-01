@@ -6,6 +6,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { LiveCallPage } from "./pages/LiveCallPage";
 import { CampaignBuilderPage } from "./pages/CampaignBuilderPage";
 import { CRMPage } from "./pages/CRMPage";
+import { UsersPage } from "./pages/UsersPage";
 import { apiRequest } from "./api";
 
 type Session = { token: string; email: string; tenant_id: number };
@@ -46,7 +47,7 @@ export function App() {
   });
 
   const links = useMemo(() => ([
-    ["/", "Inicio"], ["/onboarding", "Configuración guiada"], ["/dashboard", "Panel"], ["/live-call", "Llamadas"], ["/campaigns", "Campañas"], ["/crm", "CRM"],
+    ["/", "Inicio"], ["/onboarding", "Configuración guiada"], ["/dashboard", "Panel"], ["/live-call", "Llamadas"], ["/campaigns", "Campañas"], ["/crm", "CRM"], ["/users", "Usuarios"],
   ]), []);
 
   return (
@@ -68,6 +69,7 @@ export function App() {
           <Route path="/live-call" element={<Protected session={session}><LiveCallPage session={session} /></Protected>} />
           <Route path="/campaigns" element={<Protected session={session}><CampaignBuilderPage session={session} /></Protected>} />
           <Route path="/crm" element={<Protected session={session}><CRMPage session={session} /></Protected>} />
+          <Route path="/users" element={<Protected session={session}><UsersPage session={session} /></Protected>} />
         </Routes>
       </main>
     </div>
