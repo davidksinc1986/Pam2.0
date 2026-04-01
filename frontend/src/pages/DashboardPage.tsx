@@ -1,21 +1,27 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { apiRequest } from "../api";
 
-const labels: Record<string, { title: string; analytics: string; automations: string }> = {
-  es: { title: "Panel general", analytics: "Analítica en tiempo real", automations: "Automatizaciones" },
-  en: { title: "Overview", analytics: "Realtime analytics", automations: "Automations" },
-  pt: { title: "Painel geral", analytics: "Análises em tempo real", automations: "Automações" }
-};
+export function DashboardPage({ session }: { session: { token: string } | null }) {
+  const [data, setData] = useState<Record<string, number> | null>(null);
+  const [error, setError] = useState("");
 
-export function DashboardPage() {
-  const [lang, setLang] = useState("es");
-  const text = useMemo(() => labels[lang] ?? labels.es, [lang]);
+  useEffect(() => {
+    if (!session) return;
+    apiRequest<Record<string, number>>("/analytics/dashboard", "GET", undefined, session.token).then(setData).catch((e) => setError(e.message));
+  }, [session]);
+
+  if (error) return <p className="error">{error}</p>;
+  if (!data) return <p>Cargando métricas reales...</p>;
 
   return <section>
-    <h1>{text.title}</h1>
-    <label>Idioma <select value={lang} onChange={(e) => setLang(e.target.value)}><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option></select></label>
-    <h3>{text.analytics}</h3>
-    <div className="grid"><article className="card"><h3>Llamadas activas</h3><p>4</p></article><article className="card"><h3>Contactos nuevos</h3><p>18 hoy</p></article><article className="card"><h3>Campañas</h3><p>3 en ejecución</p></article><article className="card"><h3>Score promedio</h3><p>67/100</p></article></div>
-    <h3>{text.automations}</h3>
-    <div className="grid"><article className="card"><h3>WhatsApp</h3><p>12 mensajes enviados</p></article><article className="card"><h3>Email follow-up</h3><p>9 correos enviados</p></article></div>
+    <h1>Panel general</h1>
+    <div className="grid">
+      <article className="card"><h3>Leads totales</h3><p>{data.leads_total}</p></article>
+      <article className="card"><h3>Leads calificados</h3><p>{data.qualified_total}</p></article>
+      <article className="card"><h3>Llamadas registradas</h3><p>{data.calls_total}</p></article>
+      <article className="card"><h3>Campañas</h3><p>{data.campaigns_total}</p></article>
+      <article className="card"><h3>Mensajes WhatsApp</h3><p>{data.whatsapp_messages}</p></article>
+      <article className="card"><h3>Emails de seguimiento</h3><p>{data.email_followups}</p></article>
+    </div>
   </section>;
 }

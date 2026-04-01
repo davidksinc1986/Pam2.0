@@ -1,4 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
 from app.core.config import settings
@@ -17,6 +18,13 @@ from app.services.realtime import hub
 from app.services.security import hash_password
 
 app = FastAPI(title=settings.app_name)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(users_router)
 app.include_router(tenants_router)
 app.include_router(leads_router)

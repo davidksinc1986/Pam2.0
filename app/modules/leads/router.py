@@ -26,6 +26,18 @@ async def list_leads(db: AsyncSession = Depends(get_db), user: User = Depends(ge
     return [{"id": x.id, "name": x.name, "contact": x.contact, "source": x.source, "stage": x.stage, "score": x.score, "notes": x.notes} for x in rows]
 
 
+@router.put("/{lead_id}")
+async def update_lead(lead_id: int, payload: dict, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
+    lead = await db.scalar(select(Lead).where(Lead.id == lead_id, Lead.tenant_id == user.tenant_id))
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead no encontrado")
+    lead.name = payload.get("name", lead.name)
+    lead.contact = payload.get("contact", lead.contact)
+    lead.notes = payload.get("notes", lead.notes)
+    await db.commit()
+    return {"id": lead.id, "name": lead.name, "contact": lead.contact, "notes": lead.notes}
+
+
 @router.patch("/{lead_id}/stage")
 async def update_stage(lead_id: int, payload: MoveLeadStage, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
     lead = await db.scalar(select(Lead).where(Lead.id == lead_id, Lead.tenant_id == user.tenant_id))
