@@ -1,37 +1,21 @@
-import React, { useState } from "react";
-import { Onboarding } from "../components/Onboarding";
+import { useMemo, useState } from "react";
+
+const labels: Record<string, { title: string; analytics: string; automations: string }> = {
+  es: { title: "Panel general", analytics: "Analítica en tiempo real", automations: "Automatizaciones" },
+  en: { title: "Overview", analytics: "Realtime analytics", automations: "Automations" },
+  pt: { title: "Painel geral", analytics: "Análises em tempo real", automations: "Automações" }
+};
 
 export function DashboardPage() {
-  const [campaignName, setCampaignName] = useState("Campaña Demo");
+  const [lang, setLang] = useState("es");
+  const text = useMemo(() => labels[lang] ?? labels.es, [lang]);
 
-  return (
-    <main style={{ fontFamily: "Inter, sans-serif", margin: "0 auto", maxWidth: 960, padding: 20 }}>
-      <h1>PAM CallLeadCenter</h1>
-      <p title="Panel principal de operación para agentes y supervisores">
-        Dashboard unificado para llamadas, scripts guiados y captación de leads.
-      </p>
-
-      <label>
-        Nombre de campaña:
-        <input
-          value={campaignName}
-          onChange={(e) => setCampaignName(e.target.value)}
-          style={{ marginLeft: 8 }}
-        />
-      </label>
-
-      <Onboarding />
-
-      <section style={{ marginTop: 20 }}>
-        <h2>Tooltips rápidos</h2>
-        <button title="Abre el panel para aceptar o transferir llamadas">Llamadas en vivo</button>
-        <button title="Carga y ejecuta scripts guiados para el agente" style={{ marginLeft: 8 }}>
-          Scripts
-        </button>
-        <button title="Visualiza leads de Facebook/Instagram" style={{ marginLeft: 8 }}>
-          Leads
-        </button>
-      </section>
-    </main>
-  );
+  return <section>
+    <h1>{text.title}</h1>
+    <label>Idioma <select value={lang} onChange={(e) => setLang(e.target.value)}><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option></select></label>
+    <h3>{text.analytics}</h3>
+    <div className="grid"><article className="card"><h3>Llamadas activas</h3><p>4</p></article><article className="card"><h3>Contactos nuevos</h3><p>18 hoy</p></article><article className="card"><h3>Campañas</h3><p>3 en ejecución</p></article><article className="card"><h3>Score promedio</h3><p>67/100</p></article></div>
+    <h3>{text.automations}</h3>
+    <div className="grid"><article className="card"><h3>WhatsApp</h3><p>12 mensajes enviados</p></article><article className="card"><h3>Email follow-up</h3><p>9 correos enviados</p></article></div>
+  </section>;
 }
