@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{font-family:Inter,system-ui,sans-serif}
+body{@apply bg-slate-50 text-slate-900 m-0}
+.shell{@apply flex min-h-screen}
+.sidebar{@apply w-56 bg-slate-950 text-white p-5 flex flex-col gap-3}
+.sidebar a{@apply text-slate-300 no-underline}
+.content{@apply flex-1 p-7}
+.card{@apply bg-white border border-slate-200 rounded-xl p-4 my-3 shadow-sm}
+.grid{@apply grid grid-cols-1 md:grid-cols-2 gap-3}
+.btn{@apply bg-blue-600 text-white no-underline inline-block px-4 py-2 rounded-lg}
+.btn-secondary{@apply bg-slate-200 px-4 py-2 rounded-lg border-0}
+.btn-danger{@apply bg-red-600 text-white px-4 py-2 rounded-lg border-0}
+.row{@apply flex gap-2}
+label{@apply block my-2}
+input,select,textarea{@apply w-full p-2 rounded-lg border border-slate-300 mt-1}
+.kanban{@apply grid grid-cols-1 md:grid-cols-4 gap-2}
+.column{@apply bg-slate-100 p-3 rounded-xl min-h-48}
+.lead-card{@apply bg-white rounded-lg p-2 my-2 border border-slate-300 flex flex-col}

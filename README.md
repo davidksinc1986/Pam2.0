@@ -1,80 +1,119 @@
-# PAM-CallLeadCenter
+# PAM AI Contact Center
 
-Arquitectura de fusión para PAM + LeadGen + ColdCaller, separada en microservicios:
+Suite unificada SaaS multi-empresa para operación comercial:
 
-- `services/calls`: recepción y decisión de enrutamiento de llamadas (Twilio).
-- `services/callcoaching`: guía de agentes en tiempo real via WebSockets.
-- `services/leads`: captura de leads de Facebook/Instagram con webhook y persistencia en PostgreSQL.
-- `frontend`: dashboard React + TypeScript con onboarding y tooltips.
+- Recepción de llamadas entrantes con IA.
+- Campañas salientes (agente asistido o IA automática).
+- Gestión de contactos (social + manual).
+- Pipeline CRM visual.
+- Automatizaciones: WhatsApp + email follow-up.
+- Lead scoring por IA (heurística extensible).
+- Dashboard de analytics.
+- Multi-language real (es/en/pt base).
 
-## 1) Crear repositorio objetivo
+---
 
-Nombre sugerido: **PAM-CallLeadCenter**.
+## 1) Requisitos
 
-```bash
-git init PAM-CallLeadCenter
-```
+- Docker + Docker Compose
+- (Opcional) Python 3.11 para ejecutar scripts localmente
 
-## 2) Levantar plataforma completa
+---
+
+## 2) Configuración inicial
 
 ```bash
 cp .env.example .env
+```
+
+Si no tienes credenciales externas, el sistema corre en **modo simulado** para WhatsApp/voz/email.
+
+---
+
+## 3) Levantar todo con Docker Compose
+
+```bash
 docker compose up --build
 ```
 
 Servicios:
 
-- Frontend: `http://localhost:5173`
-- Calls API: `http://localhost:8001/docs`
-- Call-Coaching API/WS: `http://localhost:8002/docs`
-- Leads API: `http://localhost:8003/docs`
+- API: http://localhost:8000/docs
+- Frontend: http://localhost:5173
+- Mailhog UI (emails): http://localhost:8025
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
 
-## 3) Configurar credenciales
+---
 
-### Twilio
+## 4) Inicializar datos (scripts de inicialización)
 
-Configura en `.env`:
+Con contenedores levantados:
 
-- `TWILIO_ACCOUNT_SID`
-- `TWILIO_AUTH_TOKEN`
-- `TWILIO_PHONE_NUMBER`
-- `TWILIO_TRANSFER_NUMBER`
+```bash
+docker compose exec api python scripts/init_db.py
+```
 
-Luego apunta el webhook de voz de Twilio a:
+O todo en un comando:
 
-- `POST /twilio/inbound` en `calls-service`
+```bash
+./scripts/bootstrap.sh
+```
 
-### Facebook / Instagram (Meta)
+Esto crea:
 
-Configura en `.env`:
+- Empresa demo
+- Super admin
+- Leads y campaña de ejemplo
 
-- `META_VERIFY_TOKEN`
-- `META_APP_ID`
-- `META_APP_SECRET`
-- `META_ACCESS_TOKEN`
+Credenciales iniciales:
 
-Registra webhook:
+- `davidksinc@gmail.com`
+- `PamAdmin123!`
 
-- Verificación: `GET /webhooks/meta`
-- Eventos: `POST /webhooks/meta`
+---
 
-## 4) Flujo operativo
+## 5) Flujo funcional (paso a paso)
 
-1. Entra una llamada por Twilio.
-2. `calls-service` decide: agente o script automático.
-3. Agente abre dashboard React y usa acciones de llamada.
-4. Si usa guion, `callcoaching-service` guía paso a paso por WebSocket.
-5. Leads de Meta se guardan en PostgreSQL y aparecen en dashboard.
+1. Login JWT en `POST /auth/login`.
+2. Crear empresa en `POST /companies` (solo super admin).
+3. Crear leads en `POST /leads`.
+4. Crear campañas en `POST /campaigns`.
+5. Simular llamada inbound en `POST /calls/inbound`.
+6. Mover etapa CRM en `PATCH /leads/{lead_id}/stage`.
+7. Ejecutar scoring en `POST /leads/score`.
+8. Enviar WhatsApp en `POST /automations/whatsapp`.
+9. Enviar follow-up email en `POST /automations/email`.
+10. Consultar analytics en `GET /analytics/dashboard`.
+11. Conectar realtime en `WS /ws/live/{tenant_id}`.
 
-## 5) Próximas expansiones recomendadas
+---
 
-- Orquestación central (API Gateway + Auth).
-- Motor de reglas por campaña (score, horarios, disponibilidad).
-- ETL de leads con normalización y deduplicación avanzada.
-- Multi-tenant con RBAC y auditoría.
+## 6) Módulos backend
 
-## 6) Guía de ejecución profesional
+```text
+/app
+  /core
+  /modules
+      /calls
+      /campaigns
+      /leads
+      /ai
+      /users
+      /tenants
+      /automations
+      /analytics
+  /services
+  /integrations
+  /schemas
+  /db
+```
 
-Para implementar cambios con foco en estabilidad, UX para usuarios no técnicos y salida a producción, sigue la guía:
+---
 
-- `docs/principios-plataforma-saas.md`
+## 7) Notas de producción
+
+- JWT real activo.
+- Separación por empresa (`tenant_id`) en endpoints de negocio.
+- Fallback en integraciones externas para evitar errores 500.
+- Logs simples en worker para trazabilidad.
